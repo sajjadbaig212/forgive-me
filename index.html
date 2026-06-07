@@ -3,20 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I'm Sorry</title>
+    <title>For You</title>
     <style>
-        body { font-family: sans-serif; background-color: #fce4ec; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); text-align: center; max-width: 85%; }
-        h1 { color: #d81b60; font-size: 2rem; }
-        p { color: #555; font-size: 1rem; line-height: 1.5; }
-        .heart { color: #e91e63; font-size: 2.5rem; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+        
+        /* Envelope Styling */
+        .envelope-wrapper {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.5s ease;
+        }
+        .envelope {
+            position: relative;
+            width: 280px;
+            height: 180px;
+            background: #f28b9f;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+        .envelope::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 0;
+            height: 0;
+            border-left: 140px solid transparent;
+            border-right: 140px solid transparent;
+            border-top: 100px solid #ea6b85;
+            transform-origin: top;
+            transition: transform 0.4s ease 0.2s;
+            z-index: 3;
+        }
+        .envelope::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            width: 0;
+            height: 0;
+            border-left: 140px solid #f99fb1;
+            border-right: 140px solid #f99fb1;
+            border-top: 90px solid transparent;
+            border-bottom: 90px solid #f99fb1;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+            z-index: 2;
+        }
+        .heart-seal {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.5rem;
+            z-index: 4;
+            transition: transform 0.3s ease;
+        }
+        
+        /* Active Open State */
+        .envelope-wrapper.open .envelope::before {
+            transform: rotateX(180deg);
+            z-index: 1;
+        }
+        .envelope-wrapper.open {
+            transform: translateY(150px) scale(0.5);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Letter Card Styling */
+        .card {
+            position: absolute;
+            background: white;
+            width: 90%;
+            max-width: 380px;
+            padding: 35px 25px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(233, 30, 99, 0.15);
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.8) translateY(50px);
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.5s;
+            pointer-events: none;
+            border: 1px solid rgba(254, 215, 215, 0.5);
+        }
+        .card.show {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            pointer-events: auto;
+        }
+        
+        .sparkle { font-size: 1.8rem; margin-bottom: 10px; display: inline-block; }
+        h1 { color: #2d3748; font-size: 1.6rem; font-weight: 600; margin-bottom: 15px; letter-spacing: -0.5px; }
+        p { color: #4a5568; font-size: 0.95rem; line-height: 1.6; margin-bottom: 25px; text-align: left; }
+        
+        /* Buttons layout */
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            position: relative;
+            height: 45px;
+        }
+        .btn {
+            padding: 10px 28px;
+            border: none;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        #yesBtn {
+            background: #e53e3e;
+            color: white;
+            box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
+        }
+        #yesBtn:active { transform: scale(0.95); }
+        #noBtn {
+            background: #edf2f7;
+            color: #4a5568;
+            position: relative;
+        }
+        
+        /* Success Screen */
+        .success-screen {
+            display: none;
+            position: absolute;
+            background: white;
+            width: 90%;
+            max-width: 380px;
+            padding: 40px 25px;
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            animation: fadeIn 0.5s ease forwards;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="heart">❤️</div>
-        <h1>I'm Really Sorry</h1>
-        <p>Hey, I value our bond more than anything else. I hate that things got messed up between us, and I sincerely hope you can forgive me. Let's talk?</p>
+
+    <div class="envelope-wrapper" id="envelopeWrapper" onclick="openLetter()">
+        <div class="envelope">
+            <div class="heart-seal">✉️</div>
+        </div>
     </div>
+
+    <div class="card" id="letterCard">
+        <span class="sparkle">✨</span>
+        <h1>Can we talk?</h1>
+        <p>
+            I hate knowing that things aren't right between us right now. I’ve been reflecting on everything, and I sincerely regret how things played out. Our connection means the world to me, and the last thing I ever want to do is cause any distance between us. 
+            <br><br>
+            I really want to make things right. Forgive me?
+        </p>
+        <div class="btn-group">
+            <button class="btn" id="yesBtn" onclick="forgiven()">Yes</button>
+            <button class="btn" id="noBtn" onmouseover="moveButton()" onclick="moveButton()">No</button>
+        </div>
+    </div>
+
+    <div class="success-screen" id="successScreen">
+        <span style="font-size: 3.5rem;">❤️</span>
+        <h1 style="margin-top: 15px;">Thank you.</h1>
+        <p style="text-align: center; color: #718096;">Let's leave the heavy stuff behind. Text me when you're ready, I'm here.</p>
+    </div>
+
+    <script>
+        function openLetter() {
+            document.getElementById('envelopeWrapper').classList.add('open');
+            setTimeout(() => {
+                document.getElementById('letterCard').classList.add('show');
+            }, 600);
+        }
+
+        function moveButton() {
+            const noBtn = document.getElementById('noBtn');
+            // Calculates a random spot inside the visible screen layout safely for mobile viewports
+            const x = Math.random() * (window.innerWidth - noBtn.offsetWidth - 40) + 20 - (window.innerWidth / 2 - 150);
+            const y = Math.random() * (window.innerHeight - noBtn.offsetHeight - 40) + 20 - (window.innerHeight / 2 - 150);
+            
+            noBtn.style.position = 'absolute';
+            noBtn.style.left = x + 'px';
+            noBtn.style.top = y + 'px';
+        }
+
+        function forgiven() {
+            document.getElementById('letterCard').style.display = 'none';
+            document.getElementById('successScreen').style.display = 'block';
+        }
+    </script>
 </body>
 </html>
